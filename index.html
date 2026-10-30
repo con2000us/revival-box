@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>復活盒子 · AI 全息投影連環漫畫</title>
+<meta name="description" content="AI 全息投影連環漫畫，六話，方便分享。">
+<meta property="og:title" content="復活盒子 · AI 全息投影連環漫畫">
+<meta property="og:description" content="AI 全息投影連環漫畫，六話。">
+<meta property="og:type" content="article">
+<meta property="og:image" content="img/ep1_02.jpg">
+<style>
+  :root {
+    --bg: #111216;
+    --panel-bg: #1c1e24;
+    --text: #e8e6e1;
+    --muted: #9a978f;
+    --accent: #e0b15c;
+    --maxw: 760px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+    line-height: 1.6;
+  }
+  #progress {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0;
+    background: var(--accent); z-index: 50; transition: width .1s linear;
+  }
+  header {
+    max-width: var(--maxw); margin: 0 auto; padding: 48px 20px 8px;
+    text-align: center;
+  }
+  header h1 {
+    font-size: clamp(28px, 6vw, 44px); margin: 0 0 6px; letter-spacing: .08em;
+  }
+  header h1 .box { color: var(--accent); }
+  header .sub { color: var(--muted); font-size: 15px; margin: 0 0 18px; }
+  .share {
+    display: inline-block; border: 1px solid #4a4c55; color: var(--text);
+    background: var(--panel-bg); border-radius: 999px; padding: 8px 20px;
+    font-size: 14px; cursor: pointer; transition: .2s;
+  }
+  .share:hover { border-color: var(--accent); color: var(--accent); }
+  nav.chapters {
+    position: sticky; top: 0; z-index: 40;
+    background: rgba(17,18,22,.92); backdrop-filter: blur(6px);
+    border-bottom: 1px solid #26282f;
+  }
+  nav.chapters .inner {
+    max-width: var(--maxw); margin: 0 auto; display: flex; gap: 4px;
+    overflow-x: auto; padding: 8px 12px; scrollbar-width: none;
+  }
+  nav.chapters .inner::-webkit-scrollbar { display: none; }
+  nav.chapters a {
+    flex: 0 0 auto; color: var(--muted); text-decoration: none; font-size: 13px;
+    padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+  }
+  nav.chapters a:hover { color: var(--accent); background: #22242b; }
+  main { max-width: var(--maxw); margin: 0 auto; padding: 8px 16px 40px; }
+  section.chapter { margin-top: 40px; }
+  section.chapter h2 {
+    font-size: 19px; margin: 0 0 14px; color: var(--accent); letter-spacing: .05em;
+  }
+  figure { margin: 0 0 14px; }
+  figure img {
+    width: 100%; height: auto; display: block;
+    border-radius: 10px; background: var(--panel-bg);
+    box-shadow: 0 4px 18px rgba(0,0,0,.45);
+    cursor: zoom-in;
+  }
+  footer {
+    text-align: center; color: var(--muted); font-size: 13px;
+    padding: 24px 16px 56px;
+  }
+  footer a { color: var(--muted); }
+  /* lightbox */
+  #lightbox {
+    position: fixed; inset: 0; background: rgba(0,0,0,.92); z-index: 100;
+    display: none; align-items: center; justify-content: center; cursor: zoom-out;
+  }
+  #lightbox.show { display: flex; }
+  #lightbox img { max-width: 96vw; max-height: 96vh; border-radius: 6px; }
+  @media (max-width: 640px) {
+    figure img { border-radius: 6px; }
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<header>
+  <h1>復活<span class="box">盒子</span></h1>
+  <p class="sub">六話連環漫畫</p>
+  <button class="share" id="shareBtn">🔗 複製分享連結</button>
+</header>
+
+<nav class="chapters"><div class="inner">
+  <a href="#ep1">1 夢寐以求的禮物</a>
+  <a href="#ep2">2 你也有這個啊？</a>
+  <a href="#ep3">3 開始戰鬥！</a>
+  <a href="#ep4">4 小區頭號王者</a>
+  <a href="#ep5">5 盒裡的兩個人</a>
+  <a href="#ep6">6 完全是 BUG 啊！</a>
+</div></nav>
+
+<main id="main"></main>
+
+<footer>
+  原作：小紅書 @toumaxingkong ｜ 圖片已切分重製，僅供分享欣賞
+</footer>
+
+<div id="lightbox"><img id="lightboxImg" alt=""></div>
+
+<script>
+const chapters = [
+  { id: "ep1", n: 6, title: "第 1 話 · 夢寐以求的禮物" },
+  { id: "ep2", n: 6, title: "第 2 話 · 你也有這個啊？" },
+  { id: "ep3", n: 6, title: "第 3 話 · 開始戰鬥！" },
+  { id: "ep4", n: 6, title: "第 4 話 · 小區頭號王者" },
+  { id: "ep5", n: 6, title: "第 5 話 · 盒裡的兩個人" },
+  { id: "ep6", n: 4, title: "第 6 話 · 完全是 BUG 啊！" },
+];
+
+const main = document.getElementById("main");
+for (const ch of chapters) {
+  const sec = document.createElement("section");
+  sec.className = "chapter";
+  sec.id = ch.id;
+  let html = `<h2>${ch.title}</h2>`;
+  for (let i = 1; i <= ch.n; i++) {
+    const src = `img/${ch.id}_${String(i).padStart(2, "0")}.jpg`;
+    html += `<figure><img src="${src}" loading="lazy" alt="${ch.title} 分鏡 ${i}"></figure>`;
+  }
+  sec.innerHTML = html;
+  main.appendChild(sec);
+}
+
+// reading progress
+const bar = document.getElementById("progress");
+addEventListener("scroll", () => {
+  const h = document.documentElement;
+  const p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+  bar.style.width = p + "%";
+}, { passive: true });
+
+// lightbox
+const lb = document.getElementById("lightbox");
+const lbImg = document.getElementById("lightboxImg");
+main.addEventListener("click", e => {
+  if (e.target.tagName === "IMG") {
+    lbImg.src = e.target.src;
+    lb.classList.add("show");
+  }
+});
+lb.addEventListener("click", () => lb.classList.remove("show"));
+addEventListener("keydown", e => { if (e.key === "Escape") lb.classList.remove("show"); });
+
+// share
+document.getElementById("shareBtn").addEventListener("click", async function () {
+  try {
+    await navigator.clipboard.writeText(location.href);
+    this.textContent = "✅ 連結已複製";
+  } catch {
+    this.textContent = location.href;
+  }
+  setTimeout(() => this.textContent = "🔗 複製分享連結", 2000);
+});
+</script>
+</body>
+</html>
